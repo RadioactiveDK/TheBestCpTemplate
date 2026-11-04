@@ -228,6 +228,8 @@ int main(){
 	if(fp != NULL){
 		freopen("input.txt", "r", stdin);
 		freopen("output.txt", "w", stdout);
+		srand(time(0));
+		cout << rand() << endl;
 	}
 	ll t = 1;
 	cin>>t;
