@@ -119,10 +119,83 @@ class BIT {
     }
 };
 
+class SegmentTree {
+public:
+    ll maxn;
+    vll seg, lazy;
+
+    // Auxiliary function to help perform the update when required (addition)
+    void pushDown(ll node, ll L, ll R) {
+        if (lazy[node] != 0) {
+            seg[node] += lazy[node] * (R - L + 1);
+            if (L != R) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+
+    // Function to perform the given update (addition) in a given range in the tree
+    void _update(ll node, ll L, ll R, ll low, ll high, ll value) {
+        pushDown(node, L, R);
+        if (L > R || L > high || R < low) {
+            return;
+        }
+        if (L >= low && R <= high) {
+            lazy[node] += value;
+            pushDown(node, L, R);
+            return;
+        }
+
+        ll mid = L + (R - L) / 2;
+        _update(2 * node, L, mid, low, high, value);
+        _update(2 * node + 1, mid + 1, R, low, high, value);
+        seg[node] = min(seg[2 * node], seg[2 * node + 1]);
+    }
+
+    // Function to query (minimum) and get the required element from a given range
+    ll _query(ll node, ll L, ll R, ll low, ll high) {
+        pushDown(node, L, R);
+        if (L > R || L > high || R < low) {
+            return LLONG_MAX;
+        }
+        if (L >= low && R <= high) {
+            return seg[node];
+        }
+
+        ll mid = L + (R - L) / 2;
+        ll que1 = _query(2 * node, L, mid, low, high);
+        ll que2 = _query(2 * node + 1, mid + 1, R, low, high);
+        return min(que1, que2);
+    }
+
+    // Class constructor
+    SegmentTree(ll N) {
+        maxn = N;
+        seg.assign(4 * maxn + 10, 0);
+        lazy.assign(4 * maxn + 10, 0);
+    }
+
+    void fill(vll &arr) {
+        for (int i = 0; i < arr.size(); i++) {
+            update(i + 1, i + 1, arr[i]);
+        }
+    }
+
+    // Update wrapper function
+    void update(ll low, ll high, ll value) {
+        _update(1, 1, maxn, low, high, value);
+    }
+
+    // Query wrapper function
+    ll query(ll low, ll high) {
+        return _query(1, 1, maxn, low, high);
+    }
+};
 
 // ---------------------------------------------------------------------------------
 
-// CLASSES
 class DSU {
     public:
     vll parent, size;
@@ -207,13 +280,12 @@ class TRIE {
 
 };
 
-// Static Array Queries
-class SAQ {
+class SAQ { // Static Array Queries
+    public:
     ll n;
     vector<vll> minTable, maxTable;
     vll logValues;
 
-    public:
     void make_prefix_array(vll &v, vll::iterator pre){
         partial_sum(all(v),pre);
     }
@@ -255,7 +327,6 @@ class SAQ {
         return max(maxTable[L][j], maxTable[R - (1 << j) + 1][j]);
     }
 };
-
 
 class ModularArithmetic {
 public:
@@ -309,6 +380,7 @@ public:
         return (fac[N] * inv[R] % mod * inv[N - R] % mod) % mod;
     }
 };
+
 class NumTheory {
 public:
     // Method to find primes till n
@@ -348,81 +420,6 @@ public:
     }
 };
 
-// 1-indexed
-class SegmentTree {
-public:
-    ll maxn;
-    vll seg, lazy;
-
-    // Auxiliary function to help perform the update when required (addition)
-    void pushDown(ll node, ll L, ll R) {
-        if (lazy[node] != 0) {
-            seg[node] += lazy[node] * (R - L + 1);
-            if (L != R) {
-                lazy[2 * node] += lazy[node];
-                lazy[2 * node + 1] += lazy[node];
-            }
-            lazy[node] = 0;
-        }
-    }
-
-    // Function to perform the given update (addition) in a given range in the tree
-    void _update(ll node, ll L, ll R, ll low, ll high, ll value) {
-        pushDown(node, L, R);
-        if (L > R || L > high || R < low) {
-            return;
-        }
-        if (L >= low && R <= high) {
-            lazy[node] += value;
-            pushDown(node, L, R);
-            return;
-        }
-
-        ll mid = L + (R - L) / 2;
-        _update(2 * node, L, mid, low, high, value);
-        _update(2 * node + 1, mid + 1, R, low, high, value);
-        seg[node] = min(seg[2 * node], seg[2 * node + 1]);
-    }
-
-    // Function to query (minimum) and get the required element from a given range
-    ll _query(ll node, ll L, ll R, ll low, ll high) {
-        pushDown(node, L, R);
-        if (L > R || L > high || R < low) {
-            return LLONG_MAX;
-        }
-        if (L >= low && R <= high) {
-            return seg[node];
-        }
-
-        ll mid = L + (R - L) / 2;
-        ll que1 = _query(2 * node, L, mid, low, high);
-        ll que2 = _query(2 * node + 1, mid + 1, R, low, high);
-        return min(que1, que2);
-    }
-
-    // Class constructor
-    SegmentTree(ll N) {
-        maxn = N;
-        seg.assign(4 * maxn + 10, 0);
-        lazy.assign(4 * maxn + 10, 0);
-    }
-
-    void fill(vll &arr) {
-        for (int i = 0; i < arr.size(); i++) {
-            update(i + 1, i + 1, arr[i]);
-        }
-    }
-
-    // Update wrapper function
-    void update(ll low, ll high, ll value) {
-        _update(1, 1, maxn, low, high, value);
-    }
-
-    // Query wrapper function
-    ll query(ll low, ll high) {
-        return _query(1, 1, maxn, low, high);
-    }
-};
 class StringAlgos {
 public:
     // KMP Algorithm: Build the LPS array (Longest Prefix Suffix)
