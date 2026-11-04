@@ -59,7 +59,7 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 // vector
 #define take(v) for(ll i = 0; i < v.size(); i++) cin>>v[i]
 #define takeS(start,v) for(ll i = start; i < v.size(); i++) cin>>v[i]
-#define show(v) for(autox x:v) cout<<x<<" ";
+#define show(v) for(auto x:v) cout<<x<<" ";
 #define all(v) v.begin(),v.end()
 #define rall(v) v.rbegin(),v.rend()
 
