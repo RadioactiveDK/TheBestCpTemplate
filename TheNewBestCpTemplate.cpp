@@ -186,20 +186,16 @@ ll _query(ll node, ll L, ll R, ll low, ll high) {
 
 SegmentTree(const vll &arr) {
 	sz = arr.size();
-
 	n = 1;
 	while (n < sz) n *= 2;
 
 	seg.assign(2*n, {0, 0});
 
-	// Initialize leaves
 	for (ll i = 0; i < sz; i++)
-		seg[n+i].first = arr[i];
+		seg[n+i].F = arr[i];
 
-	// Build internal nodes
 	for (ll i = n-1; i >= 1; i--)
-		seg[i].first =
-			seg[2*i].first+seg[2*i+1].first;
+		seg[i].F = seg[2*i].F+seg[2*i+1].F;
 }
 
 void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
