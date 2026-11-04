@@ -1,8 +1,9 @@
-// libraries
+// LIBRARIES
 #include <bits/stdc++.h>
 using namespace std;
 #include <ext/pb_ds/assoc_container.hpp>
 using namespace __gnu_pbds;
+
 // TYPEDEF
 typedef long long ll;
 typedef long double ld;
@@ -24,22 +25,23 @@ typedef stack< ll > Sll;
 typedef queue< ll > Qll;
 typedef deque< ll > Dll;
 
-// complex number
+    // complex number
 typedef complex< ll > Cll;
-// arg(c) for angle
-// polar(r,theta) for polar form
+    // arg(c) for angle
+    // polar(r,theta) for polar form
 
-// indexed set
+    // indexed set
 typedef tree<ll, null_type, less< ll >, rb_tree_tag,
             tree_order_statistics_node_update> Isetll;
-// find_by_order returns an iterator to the element at a given position
-// auto x = s.find_by_order(2);
-// cout << *x << "\n"; // 7
-// n order_of_key returns the position of a given element
-// If the element does not appear in the set, we get the position that the element would have in the set
-// cout << s.order_of_key(7) << "\n"; // 2
+    // find_by_order returns an iterator to the element at a given position
+    // auto x = s.find_by_order(2);
+    // cout << *x << "\n"; // 7
+    // n order_of_key returns the position of a given element
+    // If the element does not appear in the set, we get the position that the element would have in the set
+    // cout << s.order_of_key(7) << "\n"; // 2
 
 // MACROS
+
     // basic
 #define MOD 1000000007
 #define PI (3.141592653589)
@@ -61,6 +63,7 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
     // vector
 #define take(v) for(ll i=0;i<v.size();i++) cin>>v[i]
 #define takeS(start,v) for(ll i=start;i<v.size();i++) cin>>v[i]
+#define show(v) for(autox x:v) cout<<x<<" ";
 #define all(v) v.begin(),v.end()
 #define rall(v) v.rbegin(),v.rend()
 
