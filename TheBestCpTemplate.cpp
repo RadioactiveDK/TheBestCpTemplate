@@ -208,11 +208,10 @@ class SAQ {
 
 // Binary Indexed Tree 1-indexed
 class BIT {
-    private:
+    public:
     vll bit;
     ll n;
 
-    public:
     BIT(ll size) : n(size) {
         bit.resize(n + 1, 0); // BIT is 1-indexed, so we need size + 1
     }
@@ -249,10 +248,9 @@ class BIT {
 };
 
 class ModularArithmetic {
-private:
+public:
     ll maxn, mod;
 
-public:
     vll fac, inv;
 
     // Class constructor to initialise the factorials and inverse factorials
@@ -341,7 +339,7 @@ public:
 };
 // 1-indexed
 class SegmentTree {
-private:
+public:
     ll maxn;
     vll seg, lazy;
 
@@ -391,7 +389,6 @@ private:
         return min(que1, que2);
     }
 
-public:
     // Class constructor
     SegmentTree(ll N) {
         maxn = N;
