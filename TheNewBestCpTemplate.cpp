@@ -202,7 +202,8 @@ SegmentTree(const vll &arr) {
 			seg[2*i].first+seg[2*i+1].first;
 }
 
-void updateRangeByAddingToEach(ll low, ll high, ll value) {
+void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
+	high++;
 	if (low >= high||low < 0||high > sz)
 		return;
 	_update(1, 0, n, low, high, value);
