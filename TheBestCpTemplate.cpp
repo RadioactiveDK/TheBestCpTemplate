@@ -340,6 +340,7 @@ public:
         return (a / b);
     }
 };
+
 // 1-indexed
 class SegmentTree {
 public:
