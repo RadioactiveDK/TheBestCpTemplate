@@ -75,6 +75,53 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 #define X real()
 #define Y imag()
 
+// ---------------------------------------------------------------------------------
+// DONE
+
+// Binary Indexed Tree 1-indexed
+class BIT {
+    public:
+    vll bit;
+    ll n;
+
+    BIT(ll size) : n(size) {
+        bit.resize(n + 1, 0); // BIT is 1-indexed, so we need size + 1
+    }
+
+    // Update the BIT at index i by adding delta
+    void update(ll i, ll delta) {
+        while (i <= n) {
+            bit[i] += delta;
+            i += i & -i; // Move to next
+        }
+    }
+
+    void fill(vll &arr){
+        for (ll i = 1; i <= n; ++i) {
+            update(i, arr[i]);
+        }
+    }
+
+    // Get the prefix sum from 1 to i
+    ll prefixSum(ll i) const {
+        i++;
+        ll sum = 0;
+        while (i > 0) {
+            sum += bit[i];
+            i -= i & -i; // Move to parent
+        }
+        return sum;
+    }
+
+    // Get the sum of elements in range [l, r]
+    ll rangeSum(ll l, ll r) const {
+        return prefixSum(r) - prefixSum(l - 1);
+    }
+};
+
+
+// ---------------------------------------------------------------------------------
+
 // CLASSES
 class DSU {
     public:
@@ -209,46 +256,6 @@ class SAQ {
     }
 };
 
-// Binary Indexed Tree 1-indexed
-class BIT {
-    public:
-    vll bit;
-    ll n;
-
-    BIT(ll size) : n(size) {
-        bit.resize(n + 1, 0); // BIT is 1-indexed, so we need size + 1
-    }
-
-    // Update the BIT at index i by adding delta
-    void update(ll i, ll delta) {
-        while (i <= n) {
-            bit[i] += delta;
-            i += i & -i; // Move to next
-        }
-    }
-
-    void fill(vll &arr){
-        for (ll i = 1; i <= n; ++i) {
-            update(i, arr[i]);
-        }
-    }
-
-    // Get the prefix sum from 1 to i
-    ll prefixSum(ll i) const {
-        i++;
-        ll sum = 0;
-        while (i > 0) {
-            sum += bit[i];
-            i -= i & -i; // Move to parent
-        }
-        return sum;
-    }
-
-    // Get the sum of elements in range [l, r]
-    ll rangeSum(ll l, ll r) const {
-        return prefixSum(r) - prefixSum(l - 1);
-    }
-};
 
 class ModularArithmetic {
 public:

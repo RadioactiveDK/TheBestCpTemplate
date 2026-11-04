@@ -76,6 +76,7 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 #define Y imag()
 
 // CLASSES
+
     // Binary Index Tree
 class FenwickTree {
     public:
