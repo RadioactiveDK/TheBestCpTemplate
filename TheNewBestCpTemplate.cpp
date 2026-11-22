@@ -332,6 +332,20 @@ class Treap {
 			root = merge(arr[0],arr[2]);
 			return root;
 		}
+
+		int querySubTreap(ll val1,ll val2){
+			auto arr = splitSubTreap(val,val);
+			int b = size(arr[1]);
+			mergeSubTreap(arr);
+			return b;
+		}
+
+		int orderOfKey(ll val){
+			auto arr = splitSubTreap(val,val);
+			int b = size(arr[0]);
+			mergeSubTreap(arr);
+			return b;
+		}
 };
 
 class ImplicitTreap {
