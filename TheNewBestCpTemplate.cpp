@@ -477,11 +477,9 @@ class ImplicitTreap {
 			return val;
 		}
 
-		ll replaceVal(int k,ll val){
-			auto arr = splitSizeSubTreap(k,k);
-			nodes[arr[1]].val = val;
-			mergeSubTreap(arr);
-			return val;
+		void replaceVal(ll val,int k){
+            deleteSubTreap(k,k);
+			insertVal(val,k);
 		}
 
 		void insertVal(ll val, int k){
