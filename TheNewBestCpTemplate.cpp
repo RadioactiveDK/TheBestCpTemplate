@@ -73,144 +73,144 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 
 // CLASSES
 class FenwickTree { // Binary Index Tree
-public:
-vll FenwickTreeArr;
-ll n;
-vll &arr;
+	public:
+		vll FenwickTreeArr;
+		ll n;
+		vll &arr;
 
-// Update the FenwickTree at index i by adding delta
-void _updateByAdding(ll i, ll delta) {
-	while (i <= n) {
-		FenwickTreeArr[i] += delta;
-		i += i& -i; // Move to next
-	}
-}
+		// Update the FenwickTree at index i by adding delta
+		void _updateByAdding(ll i, ll delta) {
+			while (i <= n) {
+				FenwickTreeArr[i] += delta;
+				i += i& -i; // Move to next
+			}
+		}
 
-void updateArrByAdding(ll i, ll delta) {
-	arr[i] += delta;
-	_updateByAdding(i+1, delta);
-}
+		void updateArrByAdding(ll i, ll delta) {
+			arr[i] += delta;
+			_updateByAdding(i+1, delta);
+		}
 
-void fill(vll &arr){
-	for (ll i = 1; i <= n; ++i) {
-		_updateByAdding(i, arr[i-1]);
-	}
-}
+		void fill(vll &arr){
+			for (ll i = 1; i <= n; ++i) {
+				_updateByAdding(i, arr[i-1]);
+			}
+		}
 
-FenwickTree(vll &arr) : arr(arr), n(arr.size()) {
-	FenwickTreeArr.resize(n+1, 0);
-	fill(arr);
-}
+		FenwickTree(vll &arr) : arr(arr), n(arr.size()) {
+			FenwickTreeArr.resize(n+1, 0);
+			fill(arr);
+		}
 
-// Get the prefix sum from 1 to i
-ll prefixSum(ll i) const {
-	ll sum = 0;
-	while (i > 0) {
-		sum += FenwickTreeArr[i];
-		i -= i& -i; // Move to parent
-	}
-	return sum;
-}
+		// Get the prefix sum from 1 to i
+		ll prefixSum(ll i) const {
+			ll sum = 0;
+			while (i > 0) {
+				sum += FenwickTreeArr[i];
+				i -= i& -i; // Move to parent
+			}
+			return sum;
+		}
 
-// Get the sum of elements in range [l, r]
-ll rangeSumInclusive(ll l, ll r) const {
-	return prefixSum(r+1)-prefixSum(l);
-}
+		// Get the sum of elements in range [l, r]
+		ll rangeSumInclusive(ll l, ll r) const {
+			return prefixSum(r+1)-prefixSum(l);
+		}
 };
 
 class SegmentTree {
-public:
-ll n;
-ll sz;
-vpll seg;     // {value, lazy}
+	public:
+		ll n;
+		ll sz;
+		vpll seg;     // {value, lazy}
 
-// Apply an addition to the entire node interval [L, R)
-void apply(ll node, ll L, ll R, ll value) {
-	seg[node].F += (R-L)*value;
-	seg[node].S += value;
-}
+		// Apply an addition to the entire node interval [L, R)
+		void apply(ll node, ll L, ll R, ll value) {
+			seg[node].F += (R-L)*value;
+			seg[node].S += value;
+		}
 
-// Push pending lazy update to children
-void push(ll node, ll L, ll R) {
-	if (seg[node].S == 0||R-L == 1)
-		return;
+		// Push pending lazy update to children
+		void push(ll node, ll L, ll R) {
+			if (seg[node].S == 0||R-L == 1)
+				return;
 
-	ll mid = L+(R-L)/2;
-	ll lazy = seg[node].S;
+			ll mid = L+(R-L)/2;
+			ll lazy = seg[node].S;
 
-	apply(2*node, L, mid, lazy);
-	apply(2*node+1, mid, R, lazy);
+			apply(2*node, L, mid, lazy);
+			apply(2*node+1, mid, R, lazy);
 
-	seg[node].S = 0;
-}
+			seg[node].S = 0;
+		}
 
-// Range addition: add value to [low, high)
-void _update(ll node, ll L, ll R,
-             ll low, ll high, ll value) {
+		// Range addition: add value to [low, high)
+		void _update(ll node, ll L, ll R,
+		             ll low, ll high, ll value) {
 
-	if (R <= low||high <= L)
-		return;
+			if (R <= low||high <= L)
+				return;
 
-	if (low <= L&&R <= high) {
-		apply(node, L, R, value);
-		return;
-	}
+			if (low <= L&&R <= high) {
+				apply(node, L, R, value);
+				return;
+			}
 
-	push(node, L, R);
+			push(node, L, R);
 
-	ll mid = L+(R-L)/2;
+			ll mid = L+(R-L)/2;
 
-	_update(2*node, L, mid, low, high, value);
-	_update(2*node+1, mid, R, low, high, value);
+			_update(2*node, L, mid, low, high, value);
+			_update(2*node+1, mid, R, low, high, value);
 
-	seg[node].F = seg[2*node].F+seg[2*node+1].F;
-}
+			seg[node].F = seg[2*node].F+seg[2*node+1].F;
+		}
 
-// Range sum query: sum of [low, high)
-ll _query(ll node, ll L, ll R, ll low, ll high) {
-	if (R <= low||high <= L)
-		return 0;
+		// Range sum query: sum of [low, high)
+		ll _query(ll node, ll L, ll R, ll low, ll high) {
+			if (R <= low||high <= L)
+				return 0;
 
-	if (low <= L&&R <= high)
-		return seg[node].F;
+			if (low <= L&&R <= high)
+				return seg[node].F;
 
-	push(node, L, R);
+			push(node, L, R);
 
-	ll mid = L+(R-L)/2;
+			ll mid = L+(R-L)/2;
 
-	ll left = _query(2*node, L, mid, low, high);
-	ll right = _query(2*node+1, mid, R, low, high);
+			ll left = _query(2*node, L, mid, low, high);
+			ll right = _query(2*node+1, mid, R, low, high);
 
-	return left+right;
-}
+			return left+right;
+		}
 
-SegmentTree(const vll &arr) {
-	sz = arr.size();
-	n = 1;
-	while (n < sz) n *= 2;
+		SegmentTree(const vll &arr) {
+			sz = arr.size();
+			n = 1;
+			while (n < sz) n *= 2;
 
-	seg.assign(2*n, {0, 0});
+			seg.assign(2*n, {0, 0});
 
-	for (ll i = 0; i < sz; i++)
-		seg[n+i].F = arr[i];
+			for (ll i = 0; i < sz; i++)
+				seg[n+i].F = arr[i];
 
-	for (ll i = n-1; i >= 1; i--)
-		seg[i].F = seg[2*i].F+seg[2*i+1].F;
-}
+			for (ll i = n-1; i >= 1; i--)
+				seg[i].F = seg[2*i].F+seg[2*i+1].F;
+		}
 
-void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
-	high++;
-	if (low >= high||low < 0||high > sz)
-		return;
-	_update(1, 0, n, low, high, value);
-}
+		void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
+			high++;
+			if (low >= high||low < 0||high > sz)
+				return;
+			_update(1, 0, n, low, high, value);
+		}
 
-ll rangeSumInclusive(ll low, ll high) {
-	high++;
-	if (low >= high||low < 0||high > sz)
-		return 0;
-	return _query(1, 0, n, low, high);
-}
+		ll rangeSumInclusive(ll low, ll high) {
+			high++;
+			if (low >= high||low < 0||high > sz)
+				return 0;
+			return _query(1, 0, n, low, high);
+		}
 };
 
 
@@ -229,7 +229,7 @@ int main(){
 		freopen("input.txt", "r", stdin);
 		freopen("output.txt", "w", stdout);
 		srand(time(0));
-		cout << rand() << endl;
+		cout<<rand()<<endl;
 	}
 	ll t = 1;
 	cin>>t;
