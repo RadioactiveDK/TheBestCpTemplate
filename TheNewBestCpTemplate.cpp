@@ -371,6 +371,7 @@ class ImplicitTreap {
 			int l, r;
 			int sz;
 			ll sm,mx;
+			bool rev;
 		};
 
 		vector<Node> nodes;
@@ -392,17 +393,29 @@ class ImplicitTreap {
 			nodes[i].mx = (ll)max({nodes[i].val,maxx(nodes[i].l),maxx(nodes[i].r)});
 		}
 
+		void push(int i){
+			if(nodes[i].rev){
+				swap(nodes[i].l,nodes[i].r);
+				nodes[i].rev = false;
+				int l = nodes[i].l,r = nodes[i].r;
+				if(l != -1)nodes[l].rev ^= 1;
+				if(r != -1)nodes[r].rev ^= 1;
+			}
+		}
+
 		pair<int,int> splitSize(int i, ll k) {
 			if (i == -1) return {-1, -1};
 
 			int leftSize = 1+size(nodes[i].l);
 			if (leftSize <= k) {
+				push(i);
 				auto [rl,rr] = splitSize(nodes[i].r,k-leftSize);
 				nodes[i].r = rl;
 				pull(i);
 				return {i,rr};
 			}
 			else {
+				push(i);
 				auto [ll,lr] = splitSize(nodes[i].l,k);
 				nodes[i].l = lr;
 				pull(i);
@@ -415,10 +428,12 @@ class ImplicitTreap {
 			if (right == -1) return left;
 
 			if (rng()%(size(left)+size(right)) < size(left)) {
+				push(left);
 				nodes[left].r = merge(nodes[left].r, right);
 				pull(left);
 				return left;
 			} else {
+				push(right);
 				nodes[right].l = merge(left, nodes[right].l);
 				pull(right);
 				return right;
@@ -467,6 +482,7 @@ class ImplicitTreap {
 		void insertVal(ll val, int k){
 			Node v;
 			v.val = val;
+			v.rev = false;
 			v.l = v.r = -1;
 			v.sz = 1;
 			nodes.PB(v);
@@ -484,7 +500,6 @@ class ImplicitTreap {
 			mergeSubTreap(arr);
 		}
 };
-
 
 
 void solve(){
