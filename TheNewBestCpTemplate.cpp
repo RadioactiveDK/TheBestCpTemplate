@@ -477,11 +477,6 @@ class ImplicitTreap {
 			return val;
 		}
 
-		void replaceVal(ll val,int k){
-            deleteSubTreap(k,k);
-			insertVal(val,k);
-		}
-
 		void insertVal(ll val, int k){
 			Node v{};
 			v.val = val;
@@ -503,6 +498,11 @@ class ImplicitTreap {
 			pull(idx);
 			arr[1] = idx;
 			mergeSubTreap(arr);
+		}
+
+		void replaceVal(ll val,int k){
+			deleteSubTreap(k,k);
+			insertVal(val,k);
 		}
 
 		void move(ll left,ll right,ll k){
