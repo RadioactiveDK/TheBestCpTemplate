@@ -268,7 +268,7 @@ class Treap {
 			}
 		}
 
-		void insert(ll val){
+		void insertVal(ll val){
 			Node v;
 			v.val = val;
 			v.l = v.r = -1;
@@ -300,12 +300,37 @@ class Treap {
 			root = merge(l,r);
 		}
 
-		void delete(ll val){
+		void deleteVal(ll val){
 			auto[l,r] = split(root,val);
 			auto[rl,rr] = split(r,val+1);
 			rl = nodes[rl].r;
 			r = merge(rl,rr);
 			root = merge(l,r);
+		}
+
+		array<int,3> splitSubTreap(ll val1,ll val2){
+			auto[l,r] = split(root,val1);
+			auto[rl,rr] = split(r,val2+1);
+			return {l,rl,rr};
+		}
+
+		int mergeSubTreap(array<int,3> arr){
+			arr[1] = merge(arr[1],arr[2]);
+			root = merge(arr[0],arr[1]);
+			return root;
+		}
+
+		bool isVal(ll val){
+			auto arr = splitSubTreap(val,val);
+			bool b = (arr[1] != -1);
+			mergeSubTreap(arr);
+			return b;
+		}
+
+		int deleteSubTreap(ll val1,ll val2){
+			auto arr = splitSubTreap(val,val2);
+			root = merge(arr[0],arr[2]);
+			return root;
 		}
 };
 
