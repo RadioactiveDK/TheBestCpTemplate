@@ -506,7 +506,7 @@ class ImplicitTreap {
 			mergeSubTreap(arr);
 		}
 
-		void move(ll left,ll right,ll pos){
+		void move(ll left,ll right,ll k){
 			int cut = deleteSubTreap(left,right);
 			auto arr = splitSizeSubTreap(k,k);
 			arr[1] = merge(cut,arr[1]);
