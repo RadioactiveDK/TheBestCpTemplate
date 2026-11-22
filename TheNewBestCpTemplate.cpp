@@ -370,6 +370,7 @@ class ImplicitTreap {
 			ll val;
 			int l, r;
 			int sz;
+			ll sm,mx;
 		};
 
 		vector<Node> nodes;
@@ -378,9 +379,17 @@ class ImplicitTreap {
 		int size(int t){
 			return t == -1 ? 0 : nodes[t].sz;
 		}
+		int summ(int t){
+			return t == -1 ? 0 : nodes[t].sm;
+		}
+		ll maxx(int t){
+			return t == -1 ? -1 : nodes[t].mx;
+		}
 
 		void pull(int i){
 			nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
+			nodes[i].sm = nodes[i].val+summ(nodes[i].l)+summ(nodes[i].r);
+			nodes[i].mx = (ll)max({nodes[i].val,maxx(nodes[i].l),maxx(nodes[i].r)});
 		}
 
 		pair<int,int> splitSize(int i, ll k) {
@@ -428,9 +437,9 @@ class ImplicitTreap {
 			return root;
 		}
 
-		int querySubTreap(int i,int j){
+		pll querySubTreap(int i,int j){
 			auto arr = splitSizeSubTreap(i,j);
-			int b = size(arr[1]);
+			pll b = {nodes[arr[1]].sm,nodes[arr[1]].mx};
 			mergeSubTreap(arr);
 			return b;
 		}
@@ -444,6 +453,13 @@ class ImplicitTreap {
 		ll findByOrder(int k){
 			auto arr = splitSizeSubTreap(k,k);
 			ll val = nodes[arr[1]].val;
+			mergeSubTreap(arr);
+			return val;
+		}
+
+		ll replaceVal(int k,ll val){
+			auto arr = splitSizeSubTreap(k,k);
+			nodes[arr[1]].val = val;
 			mergeSubTreap(arr);
 			return val;
 		}
@@ -468,6 +484,7 @@ class ImplicitTreap {
 			mergeSubTreap(arr);
 		}
 };
+
 
 
 void solve(){
