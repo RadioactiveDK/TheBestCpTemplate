@@ -468,7 +468,7 @@ class ImplicitTreap {
 		int deleteSubTreap(ll val1,ll val2){
 			auto arr = splitSizeSubTreap(val1,val2);
 			root = merge(arr[0],arr[2]);
-			return root;
+			return arr[1];
 		}
 
 		ll findByOrder(int k){
@@ -503,6 +503,13 @@ class ImplicitTreap {
 			nodes[idx].r = arr[1];
 			pull(idx);
 			arr[1] = idx;
+			mergeSubTreap(arr);
+		}
+
+		void move(ll left,ll right,ll pos){
+			int cut = deleteSubTreap(left,right);
+			auto arr = splitSizeSubTreap(k,k);
+			arr[1] = merge(cut,arr[1]);
 			mergeSubTreap(arr);
 		}
 };
