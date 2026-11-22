@@ -71,6 +71,8 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 #define X real()
 #define Y imag()
 
+
+
 // CLASSES
 class FenwickTree { // Binary Index Tree
 	public:
@@ -213,6 +215,104 @@ class SegmentTree {
 		}
 };
 
+mt19937 rng(67);
+class Treap {
+	public:
+		struct Node {
+			ll val;
+			ll prio;
+			int l, r;
+			int sz;
+		};
+
+		vector<Node> nodes;
+		int root = -1;
+
+		int size(int t) {
+			return t == -1 ? 0 : nodes[t].sz;
+		}
+
+		void pull(int i){
+			nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
+		}
+
+		pair<int,int> split(int i, ll val) {
+			if (i == -1) return {-1, -1};
+
+			if (nodes[i].val < val) {
+				auto [rl,rr] = split(nodes[i].r,val);
+				nodes[i].r = rl;
+				pull(i);
+				return {i,rr};
+			}
+			else {
+				auto [ll,lr] = split(nodes[i].l,val);
+				nodes[i].l = lr;
+				pull(i);
+				return {ll,i};
+			}
+		}
+
+		int merge(int left, int right){
+			if (left == -1) return right;
+			if (right == -1) return left;
+
+			if (nodes[left].prio > nodes[right].prio) {
+				nodes[left].r = merge(nodes[left].r, right);
+				pull(left);
+				return left;
+			} else {
+				nodes[right].l = merge(left, nodes[right].l);
+				pull(right);
+				return right;
+			}
+		}
+
+		void insert(ll val){
+			Node v;
+			v.val = val;
+			v.l = v.r = -1;
+			v.prio = rng();
+			v.sz = 1;
+			nodes.PB(v);
+
+			int idx = nodes.size()-1;
+			if(root == -1) {
+				root = idx;
+				return;
+			}
+
+			auto[l,r] = split(root,val);
+			auto[rl,rr] = split(r,val+1);
+			int t = rl;
+			if(t == -1) rl = idx;
+			else{
+				while(size(t) > 1&&nodes[t].prio < nodes[idx].prio){
+					nodes[t].sz++;
+					t = nodes[t].r;
+				}
+				nodes[t].sz++;
+				nodes[idx].r = nodes[t].r;
+				nodes[t].r = idx;
+			}
+			pull(idx);
+			r = merge(rl,rr);
+			root = merge(l,r);
+		}
+
+		void delete(ll val){
+			auto[l,r] = split(root,val);
+			auto[rl,rr] = split(r,val+1);
+			rl = nodes[rl].r;
+			r = merge(rl,rr);
+			root = merge(l,r);
+		}
+};
+
+class ImplicitTreap {
+	public:
+
+};
 
 
 void solve(){
