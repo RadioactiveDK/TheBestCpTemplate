@@ -459,6 +459,12 @@ class ImplicitTreap {
 			return b;
 		}
 
+		void reverseSubTreap(int i,int j){
+			auto arr = splitSizeSubTreap(i,j);
+			nodes[arr[1]].rev = true;
+			mergeSubTreap(arr);
+		}
+
 		int deleteSubTreap(ll val1,ll val2){
 			auto arr = splitSizeSubTreap(val1,val2);
 			root = merge(arr[0],arr[2]);
