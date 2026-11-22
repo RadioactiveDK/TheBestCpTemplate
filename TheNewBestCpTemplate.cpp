@@ -334,7 +334,7 @@ class Treap {
 		}
 
 		int querySubTreap(ll val1,ll val2){
-			auto arr = splitSubTreap(val,val);
+			auto arr = splitSubTreap(val1,val2);
 			int b = size(arr[1]);
 			mergeSubTreap(arr);
 			return b;
