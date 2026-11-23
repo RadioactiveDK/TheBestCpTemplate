@@ -410,7 +410,7 @@ class ImplicitTreap {
 				if(l != -1)nodes[l].rev ^= 1;
 				if(r != -1)nodes[r].rev ^= 1;
 			}
-			if(nodes[i].lazy!=0){
+			if(nodes[i].lazy != 0){
 				ll lazy = nodes[i].lazy;
 				int l = nodes[i].l, r = nodes[i].r;
 				apply_lazy(l,lazy);
@@ -532,6 +532,25 @@ class ImplicitTreap {
 			int cut = deleteSubTreap(left,right);
 			auto [a,b] = splitSize(root,k);
 			root = merge(merge(a,cut),b);
+		}
+
+		int findMax(){
+			if(root == -1) return -1;
+
+			ll mx = nodes[root].mx;
+			int x = root;
+			int order = 0;
+
+			push(x);
+			while(max(maxx(nodes[x].l), maxx(nodes[x].r)) == mx){
+				if(maxx(nodes[x].r) == mx){
+					order += 1+size(nodes[x].l);
+					x = nodes[x].r;
+				}
+				else x = nodes[x].l;
+				push(x);
+			}
+			return order+size(nodes[x].l);
 		}
 };
 
