@@ -547,6 +547,8 @@ class ImplicitTreap {
 					order += 1+size(nodes[x].l);
 					x = nodes[x].r;
 				}
+				else if(nodes[x].val == mx)
+					break;
 				else x = nodes[x].l;
 				push(x);
 			}
