@@ -372,6 +372,7 @@ class ImplicitTreap {
 			int sz;
 			ll sm,mx;
 			bool rev;
+			ll lazy;
 		};
 
 		vector<Node> nodes;
@@ -384,7 +385,15 @@ class ImplicitTreap {
 			return t == -1 ? 0 : nodes[t].sm;
 		}
 		ll maxx(int t){
-			return t == -1 ? -1 : nodes[t].mx;
+			return t == -1 ? LLONG_MIN : nodes[t].mx;
+		}
+
+		void apply_lazy(int i, ll lazy){
+			if(i == -1)return;
+			nodes[i].lazy += lazy;
+			nodes[i].sm += nodes[i].sz*lazy;
+			nodes[i].val += lazy;
+			nodes[i].mx += lazy;
 		}
 
 		void pull(int i){
@@ -400,6 +409,13 @@ class ImplicitTreap {
 				int l = nodes[i].l,r = nodes[i].r;
 				if(l != -1)nodes[l].rev ^= 1;
 				if(r != -1)nodes[r].rev ^= 1;
+			}
+			if(nodes[i].lazy!=0){
+				ll lazy = nodes[i].lazy;
+				int l = nodes[i].l, r = nodes[i].r;
+				apply_lazy(l,lazy);
+				apply_lazy(r,lazy);
+				nodes[i].lazy = 0;
 			}
 		}
 
@@ -464,6 +480,12 @@ class ImplicitTreap {
 			mergeSubTreap(arr);
 		}
 
+		void rangeUpdate(int i,int j,ll lazy){
+			auto arr = splitSizeSubTreap(i,j);
+			apply_lazy(arr[1],lazy)
+			mergeSubTreap(arr);
+		}
+
 		int deleteSubTreap(ll val1,ll val2){
 			auto arr = splitSizeSubTreap(val1,val2);
 			root = merge(arr[0],arr[2]);
@@ -485,6 +507,7 @@ class ImplicitTreap {
 			v.sz = 1;
 			v.sm = val;
 			v.mx = val;
+			v.lazy = 0;
 			nodes.PB(v);
 
 			int idx = nodes.size()-1;
