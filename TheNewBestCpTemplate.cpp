@@ -482,7 +482,7 @@ class ImplicitTreap {
 
 		void rangeUpdate(int i,int j,ll lazy){
 			auto arr = splitSizeSubTreap(i,j);
-			apply_lazy(arr[1],lazy)
+			apply_lazy(arr[1],lazy);
 			mergeSubTreap(arr);
 		}
 
