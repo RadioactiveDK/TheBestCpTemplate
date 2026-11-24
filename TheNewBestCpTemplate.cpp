@@ -75,485 +75,485 @@ typedef tree<ll, null_type, less< ll >, rb_tree_tag,
 
 // CLASSES
 class FenwickTree { // Binary Index Tree
-	public:
-		vll FenwickTreeArr;
-		ll n;
-		vll &arr;
+public:
+	vll FenwickTreeArr;
+	ll n;
+	vll &arr;
 
-		// Update the FenwickTree at index i by adding delta
-		void _updateByAdding(ll i, ll delta) {
-			while (i <= n) {
-				FenwickTreeArr[i] += delta;
-				i += i& -i; // Move to next
-			}
+	// Update the FenwickTree at index i by adding delta
+	void _updateByAdding(ll i, ll delta) {
+		while (i <= n) {
+			FenwickTreeArr[i] += delta;
+			i += i& -i;     // Move to next
 		}
+	}
 
-		void updateArrByAdding(ll i, ll delta) {
-			arr[i] += delta;
-			_updateByAdding(i+1, delta);
-		}
+	void updateArrByAdding(ll i, ll delta) {
+		arr[i] += delta;
+		_updateByAdding(i+1, delta);
+	}
 
-		void fill(vll &arr){
-			for (ll i = 1; i <= n; ++i) {
-				_updateByAdding(i, arr[i-1]);
-			}
+	void fill(vll &arr){
+		for (ll i = 1; i <= n; ++i) {
+			_updateByAdding(i, arr[i-1]);
 		}
+	}
 
-		FenwickTree(vll &arr) : arr(arr), n(arr.size()) {
-			FenwickTreeArr.resize(n+1, 0);
-			fill(arr);
-		}
+	FenwickTree(vll &arr) : arr(arr), n(arr.size()) {
+		FenwickTreeArr.resize(n+1, 0);
+		fill(arr);
+	}
 
-		// Get the prefix sum from 1 to i
-		ll prefixSum(ll i) const {
-			ll sum = 0;
-			while (i > 0) {
-				sum += FenwickTreeArr[i];
-				i -= i& -i; // Move to parent
-			}
-			return sum;
+	// Get the prefix sum from 1 to i
+	ll prefixSum(ll i) const {
+		ll sum = 0;
+		while (i > 0) {
+			sum += FenwickTreeArr[i];
+			i -= i& -i;     // Move to parent
 		}
+		return sum;
+	}
 
-		// Get the sum of elements in range [l, r]
-		ll rangeSumInclusive(ll l, ll r) const {
-			return prefixSum(r+1)-prefixSum(l);
-		}
+	// Get the sum of elements in range [l, r]
+	ll rangeSumInclusive(ll l, ll r) const {
+		return prefixSum(r+1)-prefixSum(l);
+	}
 };
 
 class SegmentTree {
-	public:
-		ll n;
-		ll sz;
-		vpll seg;     // {value, lazy}
+public:
+	ll n;
+	ll sz;
+	vpll seg;         // {value, lazy}
 
-		// Apply an addition to the entire node interval [L, R)
-		void apply(ll node, ll L, ll R, ll value) {
-			seg[node].F += (R-L)*value;
-			seg[node].S += value;
+	// Apply an addition to the entire node interval [L, R)
+	void apply(ll node, ll L, ll R, ll value) {
+		seg[node].F += (R-L)*value;
+		seg[node].S += value;
+	}
+
+	// Push pending lazy update to children
+	void push(ll node, ll L, ll R) {
+		if (seg[node].S == 0||R-L == 1)
+			return;
+
+		ll mid = L+(R-L)/2;
+		ll lazy = seg[node].S;
+
+		apply(2*node, L, mid, lazy);
+		apply(2*node+1, mid, R, lazy);
+
+		seg[node].S = 0;
+	}
+
+	// Range addition: add value to [low, high)
+	void _update(ll node, ll L, ll R,
+	             ll low, ll high, ll value) {
+
+		if (R <= low||high <= L)
+			return;
+
+		if (low <= L&&R <= high) {
+			apply(node, L, R, value);
+			return;
 		}
 
-		// Push pending lazy update to children
-		void push(ll node, ll L, ll R) {
-			if (seg[node].S == 0||R-L == 1)
-				return;
+		push(node, L, R);
 
-			ll mid = L+(R-L)/2;
-			ll lazy = seg[node].S;
+		ll mid = L+(R-L)/2;
 
-			apply(2*node, L, mid, lazy);
-			apply(2*node+1, mid, R, lazy);
+		_update(2*node, L, mid, low, high, value);
+		_update(2*node+1, mid, R, low, high, value);
 
-			seg[node].S = 0;
-		}
+		seg[node].F = seg[2*node].F+seg[2*node+1].F;
+	}
 
-		// Range addition: add value to [low, high)
-		void _update(ll node, ll L, ll R,
-		             ll low, ll high, ll value) {
+	// Range sum query: sum of [low, high)
+	ll _query(ll node, ll L, ll R, ll low, ll high) {
+		if (R <= low||high <= L)
+			return 0;
 
-			if (R <= low||high <= L)
-				return;
+		if (low <= L&&R <= high)
+			return seg[node].F;
 
-			if (low <= L&&R <= high) {
-				apply(node, L, R, value);
-				return;
-			}
+		push(node, L, R);
 
-			push(node, L, R);
+		ll mid = L+(R-L)/2;
 
-			ll mid = L+(R-L)/2;
+		ll left = _query(2*node, L, mid, low, high);
+		ll right = _query(2*node+1, mid, R, low, high);
 
-			_update(2*node, L, mid, low, high, value);
-			_update(2*node+1, mid, R, low, high, value);
+		return left+right;
+	}
 
-			seg[node].F = seg[2*node].F+seg[2*node+1].F;
-		}
+	SegmentTree(const vll &arr) {
+		sz = arr.size();
+		n = 1;
+		while (n < sz) n *= 2;
 
-		// Range sum query: sum of [low, high)
-		ll _query(ll node, ll L, ll R, ll low, ll high) {
-			if (R <= low||high <= L)
-				return 0;
+		seg.assign(2*n, {0, 0});
 
-			if (low <= L&&R <= high)
-				return seg[node].F;
+		for (ll i = 0; i < sz; i++)
+			seg[n+i].F = arr[i];
 
-			push(node, L, R);
+		for (ll i = n-1; i >= 1; i--)
+			seg[i].F = seg[2*i].F+seg[2*i+1].F;
+	}
 
-			ll mid = L+(R-L)/2;
+	void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
+		high++;
+		if (low >= high||low < 0||high > sz)
+			return;
+		_update(1, 0, n, low, high, value);
+	}
 
-			ll left = _query(2*node, L, mid, low, high);
-			ll right = _query(2*node+1, mid, R, low, high);
-
-			return left+right;
-		}
-
-		SegmentTree(const vll &arr) {
-			sz = arr.size();
-			n = 1;
-			while (n < sz) n *= 2;
-
-			seg.assign(2*n, {0, 0});
-
-			for (ll i = 0; i < sz; i++)
-				seg[n+i].F = arr[i];
-
-			for (ll i = n-1; i >= 1; i--)
-				seg[i].F = seg[2*i].F+seg[2*i+1].F;
-		}
-
-		void updateRangeByAddingToEachInclusively(ll low, ll high, ll value) {
-			high++;
-			if (low >= high||low < 0||high > sz)
-				return;
-			_update(1, 0, n, low, high, value);
-		}
-
-		ll rangeSumInclusive(ll low, ll high) {
-			high++;
-			if (low >= high||low < 0||high > sz)
-				return 0;
-			return _query(1, 0, n, low, high);
-		}
+	ll rangeSumInclusive(ll low, ll high) {
+		high++;
+		if (low >= high||low < 0||high > sz)
+			return 0;
+		return _query(1, 0, n, low, high);
+	}
 };
 
 mt19937 rng(67);
 class Treap {
-	public:
-		struct Node {
-			ll val;
-			ll prio;
-			int l, r;
-			int sz;
-		};
+public:
+	struct Node {
+		ll val;
+		ll prio;
+		int l, r;
+		int sz;
+	};
 
-		vector<Node> nodes;
-		int root = -1;
+	vector<Node> nodes;
+	int root = -1;
 
-		int size(int t) {
-			return t == -1 ? 0 : nodes[t].sz;
+	int size(int t) {
+		return t == -1 ? 0 : nodes[t].sz;
+	}
+
+	void pull(int i){
+		nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
+	}
+
+	pair<int,int> split(int i, ll val) {
+		if (i == -1) return {-1, -1};
+
+		if (nodes[i].val < val) {
+			auto [rl,rr] = split(nodes[i].r,val);
+			nodes[i].r = rl;
+			pull(i);
+			return {i,rr};
+		}
+		else {
+			auto [ll,lr] = split(nodes[i].l,val);
+			nodes[i].l = lr;
+			pull(i);
+			return {ll,i};
+		}
+	}
+
+	int merge(int left, int right){
+		if (left == -1) return right;
+		if (right == -1) return left;
+
+		if (nodes[left].prio > nodes[right].prio) {
+			nodes[left].r = merge(nodes[left].r, right);
+			pull(left);
+			return left;
+		} else {
+			nodes[right].l = merge(left, nodes[right].l);
+			pull(right);
+			return right;
+		}
+	}
+
+	void insertVal(ll val){
+		Node v;
+		v.val = val;
+		v.l = v.r = -1;
+		v.prio = rng();
+		v.sz = 1;
+		nodes.PB(v);
+
+		int idx = nodes.size()-1;
+		if(root == -1) {
+			root = idx;
+			return;
 		}
 
-		void pull(int i){
-			nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
-		}
-
-		pair<int,int> split(int i, ll val) {
-			if (i == -1) return {-1, -1};
-
-			if (nodes[i].val < val) {
-				auto [rl,rr] = split(nodes[i].r,val);
-				nodes[i].r = rl;
-				pull(i);
-				return {i,rr};
-			}
-			else {
-				auto [ll,lr] = split(nodes[i].l,val);
-				nodes[i].l = lr;
-				pull(i);
-				return {ll,i};
-			}
-		}
-
-		int merge(int left, int right){
-			if (left == -1) return right;
-			if (right == -1) return left;
-
-			if (nodes[left].prio > nodes[right].prio) {
-				nodes[left].r = merge(nodes[left].r, right);
-				pull(left);
-				return left;
-			} else {
-				nodes[right].l = merge(left, nodes[right].l);
-				pull(right);
-				return right;
-			}
-		}
-
-		void insertVal(ll val){
-			Node v;
-			v.val = val;
-			v.l = v.r = -1;
-			v.prio = rng();
-			v.sz = 1;
-			nodes.PB(v);
-
-			int idx = nodes.size()-1;
-			if(root == -1) {
-				root = idx;
-				return;
-			}
-
-			auto[l,r] = split(root,val);
-			auto[rl,rr] = split(r,val+1);
-			int t = rl;
-			if(t == -1) rl = idx;
-			else{
-				while(size(t) > 1&&nodes[t].prio < nodes[idx].prio){
-					nodes[t].sz++;
-					t = nodes[t].r;
-				}
+		auto[l,r] = split(root,val);
+		auto[rl,rr] = split(r,val+1);
+		int t = rl;
+		if(t == -1) rl = idx;
+		else{
+			while(size(t) > 1&&nodes[t].prio < nodes[idx].prio){
 				nodes[t].sz++;
-				nodes[idx].r = nodes[t].r;
-				nodes[t].r = idx;
+				t = nodes[t].r;
 			}
-			pull(idx);
-			r = merge(rl,rr);
-			root = merge(l,r);
+			nodes[t].sz++;
+			nodes[idx].r = nodes[t].r;
+			nodes[t].r = idx;
 		}
+		pull(idx);
+		r = merge(rl,rr);
+		root = merge(l,r);
+	}
 
-		void deleteVal(ll val){
-			auto[l,r] = split(root,val);
-			auto[rl,rr] = split(r,val+1);
-			rl = nodes[rl].r;
-			r = merge(rl,rr);
-			root = merge(l,r);
-		}
+	void deleteVal(ll val){
+		auto[l,r] = split(root,val);
+		auto[rl,rr] = split(r,val+1);
+		rl = nodes[rl].r;
+		r = merge(rl,rr);
+		root = merge(l,r);
+	}
 
-		array<int,3> splitSubTreap(ll val1,ll val2){
-			auto[l,r] = split(root,val1);
-			auto[rl,rr] = split(r,val2+1);
-			return {l,rl,rr};
-		}
+	array<int,3> splitSubTreap(ll val1,ll val2){
+		auto[l,r] = split(root,val1);
+		auto[rl,rr] = split(r,val2+1);
+		return {l,rl,rr};
+	}
 
-		int mergeSubTreap(array<int,3> arr){
-			arr[1] = merge(arr[1],arr[2]);
-			root = merge(arr[0],arr[1]);
-			return root;
-		}
+	int mergeSubTreap(array<int,3> arr){
+		arr[1] = merge(arr[1],arr[2]);
+		root = merge(arr[0],arr[1]);
+		return root;
+	}
 
-		bool isVal(ll val){
-			auto arr = splitSubTreap(val,val);
-			bool b = (arr[1] != -1);
-			mergeSubTreap(arr);
-			return b;
-		}
+	bool isVal(ll val){
+		auto arr = splitSubTreap(val,val);
+		bool b = (arr[1] != -1);
+		mergeSubTreap(arr);
+		return b;
+	}
 
-		int deleteSubTreap(ll val1,ll val2){
-			auto arr = splitSubTreap(val1,val2);
-			root = merge(arr[0],arr[2]);
-			return root;
-		}
+	int deleteSubTreap(ll val1,ll val2){
+		auto arr = splitSubTreap(val1,val2);
+		root = merge(arr[0],arr[2]);
+		return root;
+	}
 
-		int querySubTreap(ll val1,ll val2){
-			auto arr = splitSubTreap(val1,val2);
-			int b = size(arr[1]);
-			mergeSubTreap(arr);
-			return b;
-		}
+	int querySubTreap(ll val1,ll val2){
+		auto arr = splitSubTreap(val1,val2);
+		int b = size(arr[1]);
+		mergeSubTreap(arr);
+		return b;
+	}
 
-		int orderOfKey(ll val){
-			auto arr = splitSubTreap(val,val);
-			int b = size(arr[0]);
-			mergeSubTreap(arr);
-			return b;
-		}
+	int orderOfKey(ll val){
+		auto arr = splitSubTreap(val,val);
+		int b = size(arr[0]);
+		mergeSubTreap(arr);
+		return b;
+	}
 
-		ll findByOrder(int k){
-			int x = root;
-			k++;
+	ll findByOrder(int k){
+		int x = root;
+		k++;
 
-			int idx = 0;
-			while(idx != k){
-				if(1+size(nodes[x].l) > k)
-					x = nodes[x].l;
-				else {
-					idx += 1+size(nodes[x].l);
-					if(idx != k) x = nodes[x].r;
-				}
+		int idx = 0;
+		while(idx != k){
+			if(1+size(nodes[x].l) > k)
+				x = nodes[x].l;
+			else {
+				idx += 1+size(nodes[x].l);
+				if(idx != k) x = nodes[x].r;
 			}
-			return nodes[x].val;
 		}
+		return nodes[x].val;
+	}
 };
 
 class ImplicitTreap {
-	public:
-		struct Node {
-			ll val;
-			int l, r;
-			int sz;
-			ll sm,mx;
-			bool rev;
-			ll lazy;
-		};
+public:
+	struct Node {
+		ll val;
+		int l, r;
+		int sz;
+		ll sm,mx;
+		bool rev;
+		ll lazy;
+	};
 
-		vector<Node> nodes;
-		int root = -1;
+	vector<Node> nodes;
+	int root = -1;
 
-		int size(int t){
-			return t == -1 ? 0 : nodes[t].sz;
+	int size(int t){
+		return t == -1 ? 0 : nodes[t].sz;
+	}
+	ll summ(int t){
+		return t == -1 ? 0 : nodes[t].sm;
+	}
+	ll maxx(int t){
+		return t == -1 ? LLONG_MIN : nodes[t].mx;
+	}
+
+	void apply_lazy(int i, ll lazy){
+		if(i == -1) return;
+		nodes[i].lazy += lazy;
+		nodes[i].sm += nodes[i].sz*lazy;
+		nodes[i].val += lazy;
+		nodes[i].mx += lazy;
+	}
+
+	void pull(int i){
+		nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
+		nodes[i].sm = nodes[i].val+summ(nodes[i].l)+summ(nodes[i].r);
+		nodes[i].mx = (ll)max({nodes[i].val,maxx(nodes[i].l),maxx(nodes[i].r)});
+	}
+
+	void push(int i){
+		if(nodes[i].rev){
+			swap(nodes[i].l,nodes[i].r);
+			nodes[i].rev = false;
+			int l = nodes[i].l,r = nodes[i].r;
+			if(l != -1) nodes[l].rev ^= 1;
+			if(r != -1) nodes[r].rev ^= 1;
 		}
-		ll summ(int t){
-			return t == -1 ? 0 : nodes[t].sm;
+		if(nodes[i].lazy != 0){
+			ll lazy = nodes[i].lazy;
+			int l = nodes[i].l, r = nodes[i].r;
+			apply_lazy(l,lazy);
+			apply_lazy(r,lazy);
+			nodes[i].lazy = 0;
 		}
-		ll maxx(int t){
-			return t == -1 ? LLONG_MIN : nodes[t].mx;
+	}
+
+	pair<int,int> splitSize(int i, ll k) {
+		if (i == -1) return {-1, -1};
+
+		push(i);
+		int leftSize = 1+size(nodes[i].l);
+		if (leftSize <= k) {
+			auto [rl,rr] = splitSize(nodes[i].r,k-leftSize);
+			nodes[i].r = rl;
+			pull(i);
+			return {i,rr};
+		}
+		else {
+			auto [ll,lr] = splitSize(nodes[i].l,k);
+			nodes[i].l = lr;
+			pull(i);
+			return {ll,i};
+		}
+	}
+
+	int merge(int left, int right){
+		if (left == -1) return right;
+		if (right == -1) return left;
+
+		if (rng()%(size(left)+size(right)) < size(left)) {
+			push(left);
+			nodes[left].r = merge(nodes[left].r, right);
+			pull(left);
+			return left;
+		} else {
+			push(right);
+			nodes[right].l = merge(left, nodes[right].l);
+			pull(right);
+			return right;
+		}
+	}
+
+	array<int,3> splitSizeSubTreap(ll i, ll j){
+		auto[l,r] = splitSize(root,j+1);
+		auto[ll,lr] = splitSize(l,i);
+		return {ll,lr,r};
+	}
+
+	int mergeSubTreap(array<int,3> arr){
+		arr[1] = merge(arr[1],arr[2]);
+		root = merge(arr[0],arr[1]);
+		return root;
+	}
+
+	pll querySubTreap(int i,int j){
+		auto arr = splitSizeSubTreap(i,j);
+		pll b = {nodes[arr[1]].sm,nodes[arr[1]].mx};
+		mergeSubTreap(arr);
+		return b;
+	}
+
+	void reverseSubTreap(int i,int j){
+		auto arr = splitSizeSubTreap(i,j);
+		nodes[arr[1]].rev = true;
+		mergeSubTreap(arr);
+	}
+
+	void rangeUpdate(int i,int j,ll lazy){
+		auto arr = splitSizeSubTreap(i,j);
+		apply_lazy(arr[1],lazy);
+		mergeSubTreap(arr);
+	}
+
+	int deleteSubTreap(ll val1,ll val2){
+		auto arr = splitSizeSubTreap(val1,val2);
+		root = merge(arr[0],arr[2]);
+		return arr[1];
+	}
+
+	ll findByOrder(int k){
+		auto arr = splitSizeSubTreap(k,k);
+		ll val = nodes[arr[1]].val;
+		mergeSubTreap(arr);
+		return val;
+	}
+
+	void insertVal(ll val, int k){
+		Node v{};
+		v.val = val;
+		v.rev = false;
+		v.l = v.r = -1;
+		v.sz = 1;
+		v.sm = val;
+		v.mx = val;
+		v.lazy = 0;
+		nodes.PB(v);
+
+		int idx = nodes.size()-1;
+		if(root == -1) {
+			root = idx;
+			return;
 		}
 
-		void apply_lazy(int i, ll lazy){
-			if(i == -1)return;
-			nodes[i].lazy += lazy;
-			nodes[i].sm += nodes[i].sz*lazy;
-			nodes[i].val += lazy;
-			nodes[i].mx += lazy;
-		}
+		auto arr = splitSizeSubTreap(k,k);
+		nodes[idx].r = arr[1];
+		pull(idx);
+		arr[1] = idx;
+		mergeSubTreap(arr);
+	}
 
-		void pull(int i){
-			nodes[i].sz = 1+size(nodes[i].l)+size(nodes[i].r);
-			nodes[i].sm = nodes[i].val+summ(nodes[i].l)+summ(nodes[i].r);
-			nodes[i].mx = (ll)max({nodes[i].val,maxx(nodes[i].l),maxx(nodes[i].r)});
-		}
+	void replaceVal(ll val,int k){
+		deleteSubTreap(k,k);
+		insertVal(val,k);
+	}
 
-		void push(int i){
-			if(nodes[i].rev){
-				swap(nodes[i].l,nodes[i].r);
-				nodes[i].rev = false;
-				int l = nodes[i].l,r = nodes[i].r;
-				if(l != -1)nodes[l].rev ^= 1;
-				if(r != -1)nodes[r].rev ^= 1;
+	void move(ll left,ll right,ll k){
+		int cut = deleteSubTreap(left,right);
+		auto [a,b] = splitSize(root,k);
+		root = merge(merge(a,cut),b);
+	}
+
+	int findMax(){
+		if(root == -1) return -1;
+
+		ll mx = nodes[root].mx;
+		int x = root;
+		int order = 0;
+
+		push(x);
+		while(max(maxx(nodes[x].l), maxx(nodes[x].r)) == mx){
+			if(maxx(nodes[x].r) == mx){
+				order += 1+size(nodes[x].l);
+				x = nodes[x].r;
 			}
-			if(nodes[i].lazy != 0){
-				ll lazy = nodes[i].lazy;
-				int l = nodes[i].l, r = nodes[i].r;
-				apply_lazy(l,lazy);
-				apply_lazy(r,lazy);
-				nodes[i].lazy = 0;
-			}
-		}
-
-		pair<int,int> splitSize(int i, ll k) {
-			if (i == -1) return {-1, -1};
-
-			push(i);
-			int leftSize = 1+size(nodes[i].l);
-			if (leftSize <= k) {
-				auto [rl,rr] = splitSize(nodes[i].r,k-leftSize);
-				nodes[i].r = rl;
-				pull(i);
-				return {i,rr};
-			}
-			else {
-				auto [ll,lr] = splitSize(nodes[i].l,k);
-				nodes[i].l = lr;
-				pull(i);
-				return {ll,i};
-			}
-		}
-
-		int merge(int left, int right){
-			if (left == -1) return right;
-			if (right == -1) return left;
-
-			if (rng()%(size(left)+size(right)) < size(left)) {
-				push(left);
-				nodes[left].r = merge(nodes[left].r, right);
-				pull(left);
-				return left;
-			} else {
-				push(right);
-				nodes[right].l = merge(left, nodes[right].l);
-				pull(right);
-				return right;
-			}
-		}
-
-		array<int,3> splitSizeSubTreap(ll i, ll j){
-			auto[l,r] = splitSize(root,j+1);
-			auto[ll,lr] = splitSize(l,i);
-			return {ll,lr,r};
-		}
-
-		int mergeSubTreap(array<int,3> arr){
-			arr[1] = merge(arr[1],arr[2]);
-			root = merge(arr[0],arr[1]);
-			return root;
-		}
-
-		pll querySubTreap(int i,int j){
-			auto arr = splitSizeSubTreap(i,j);
-			pll b = {nodes[arr[1]].sm,nodes[arr[1]].mx};
-			mergeSubTreap(arr);
-			return b;
-		}
-
-		void reverseSubTreap(int i,int j){
-			auto arr = splitSizeSubTreap(i,j);
-			nodes[arr[1]].rev = true;
-			mergeSubTreap(arr);
-		}
-
-		void rangeUpdate(int i,int j,ll lazy){
-			auto arr = splitSizeSubTreap(i,j);
-			apply_lazy(arr[1],lazy);
-			mergeSubTreap(arr);
-		}
-
-		int deleteSubTreap(ll val1,ll val2){
-			auto arr = splitSizeSubTreap(val1,val2);
-			root = merge(arr[0],arr[2]);
-			return arr[1];
-		}
-
-		ll findByOrder(int k){
-			auto arr = splitSizeSubTreap(k,k);
-			ll val = nodes[arr[1]].val;
-			mergeSubTreap(arr);
-			return val;
-		}
-
-		void insertVal(ll val, int k){
-			Node v{};
-			v.val = val;
-			v.rev = false;
-			v.l = v.r = -1;
-			v.sz = 1;
-			v.sm = val;
-			v.mx = val;
-			v.lazy = 0;
-			nodes.PB(v);
-
-			int idx = nodes.size()-1;
-			if(root == -1) {
-				root = idx;
-				return;
-			}
-
-			auto arr = splitSizeSubTreap(k,k);
-			nodes[idx].r = arr[1];
-			pull(idx);
-			arr[1] = idx;
-			mergeSubTreap(arr);
-		}
-
-		void replaceVal(ll val,int k){
-			deleteSubTreap(k,k);
-			insertVal(val,k);
-		}
-
-		void move(ll left,ll right,ll k){
-			int cut = deleteSubTreap(left,right);
-			auto [a,b] = splitSize(root,k);
-			root = merge(merge(a,cut),b);
-		}
-
-		int findMax(){
-			if(root == -1) return -1;
-
-			ll mx = nodes[root].mx;
-			int x = root;
-			int order = 0;
-
+			else if(nodes[x].val == mx)
+				break;
+			else x = nodes[x].l;
 			push(x);
-			while(max(maxx(nodes[x].l), maxx(nodes[x].r)) == mx){
-				if(maxx(nodes[x].r) == mx){
-					order += 1+size(nodes[x].l);
-					x = nodes[x].r;
-				}
-				else if(nodes[x].val == mx)
-					break;
-				else x = nodes[x].l;
-				push(x);
-			}
-			return order+size(nodes[x].l);
 		}
+		return order+size(nodes[x].l);
+	}
 };
 
 
